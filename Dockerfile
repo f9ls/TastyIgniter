@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql zip opcache intl \
+    && docker-php-ext-install gd pdo_mysql zip opcache intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
@@ -20,7 +20,6 @@ WORKDIR /var/www/html
 
 COPY . .
 
-# ضبط استهلاك الذاكرة لـ Composer لتفادي الانهيار
 ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --ignore-platform-req=ext-intl
 
