@@ -27,7 +27,5 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf
-
-# تشغيل التهيئة ثم تشغيل Apache مباشرة
-CMD sh -c "php artisan migrate --force && php artisan igniter:up --force; exec apache2-foreground"
+# ضبط المنفذ وتشغيل التهيئة مع خادم Apache فوراً
+CMD sh -c "sed -i \"s/80/\$PORT/g\" /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf && (php artisan migrate --force && php artisan igniter:up --force &) && exec apache2-foreground"
