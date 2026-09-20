@@ -30,4 +30,4 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf
 
 # تشغيل التهيئة ثم تشغيل Apache مباشرة
-CMD sh -c "php artisan igniter:up --force; exec apache2-foreground"
+CMD sh -c "php artisan migrate --force && php artisan igniter:up --force; exec apache2-foreground"
