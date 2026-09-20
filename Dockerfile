@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql zip opcache intl
+    && docker-php-ext-install gd pdo pdo_mysql zip opcache intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
 
@@ -19,7 +20,9 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-intl
+# ضبط استهلاك الذاكرة لـ Composer لتفادي الانهيار
+ENV COMPOSER_MEMORY_LIMIT=-1
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --ignore-platform-req=ext-intl
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
@@ -27,5 +30,4 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# ضبط المنفذ وتشغيل التهيئة مع خادم Apache فوراً
 CMD sh -c "sed -i \"s/80/\$PORT/g\" /etc/apache2/ports.conf /etc/apache2/sites-available/*.conf && php artisan igniter:up --force && exec apache2-foreground"
